@@ -19,12 +19,12 @@ public class CosineSimilarityScorer extends AScorer
 {
 	///////////////weights///////////////////////////
 	
-	private static double urlweight = -1;
-	private static double titleweight  = -1;
-	private static double bodyweight = -1;
-	private static double headerweight = -1;
-	private static double anchorweight = -1;
-	private static double smoothingBodyLength = 500;
+	private double urlweight = 1;
+	private double titleweight = 1;
+	private double bodyweight = 1;
+	private double headerweight = 1;
+	private double anchorweight = 1;
+	private double smoothingBodyLength = 500;
 
 	Map<String, Double> weightParams = new HashMap<String, Double>();
 
@@ -42,7 +42,8 @@ public class CosineSimilarityScorer extends AScorer
 		weightParams.put("anchor", anchorweight);
 	}
 
-	public double getNetScore(Map<String, Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery, Document d) throws Exception
+	public double getNetScore(Map<String, Map<String, Double>> tfs, Query q, 
+			Map<String, Double> tfQuery, Document d, Map<String, Double> idfs, int numDocs) throws Exception
 	{
 		double score = 0.0;
 
@@ -51,12 +52,22 @@ public class CosineSimilarityScorer extends AScorer
 			for (String term : tfs.get(type).keySet()) {
 				if (!tfQuery.containsKey(term)) {
 					throw new Exception("Exception in getNetScore(): KEYS ARE NOT THE SAME!");
+				}		
+				
+				double idfComponent = -1;
+				if (idfs.containsKey(term)) {
+					idfComponent = idfs.get(term);
+				} else {
+					idfComponent = Math.log10(idfs.size() + numDocs);
 				}
-				currTotal += tfs.get(type).get(term) * tfQuery.get(term);
+				
+				currTotal += tfs.get(type).get(term) * idfComponent;
 			}
 			
 			score += weightParams.get(type) * currTotal;
 		}
+		
+		//System.out.println("SCORE: " + score);
 
 		return score;
 	}
@@ -66,7 +77,11 @@ public class CosineSimilarityScorer extends AScorer
 	{
 		for (String type : tfs.keySet()) {			
 			for (String term : tfs.get(type).keySet()) {
-				double newVal = (1.0 + Math.log(tfs.get(type).get(term))) / (smoothingBodyLength + d.body_length);
+				double tf = tfs.get(type).get(term);
+				double newVal = 0;
+				if (tf != 0) {
+					newVal = (1.0 + Math.log(tf)) / (smoothingBodyLength + d.body_length);
+				}
 				tfs.get(type).put(term, newVal);
 			}
 		}
@@ -74,14 +89,14 @@ public class CosineSimilarityScorer extends AScorer
 
 
 	@Override
-	public double getSimScore(Document d, Query q) throws Exception 
+	public double getSimScore(Document d, Query q, Map<String,Double> idfs, int numDocs) throws Exception 
 	{
 		Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d, q);
 		this.normalizeTFs(tfs, d, q);
 
 		Map<String,Double> tfQuery = getQueryFreqs(q);
-
-		return getNetScore(tfs, q, tfQuery, d);
+		
+		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs);
 	}
 
 

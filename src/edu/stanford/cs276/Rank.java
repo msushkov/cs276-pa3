@@ -14,7 +14,7 @@ public class Rank
 {
 
 	private static Map<Query,List<String>> score(Map<Query,Map<String, Document>> queryDict, String scoreType,
-			Map<String,Double> idfs) throws Exception
+			Map<String,Double> idfs, int numDocs) throws Exception
 	{
 		AScorer scorer = null;
 		if (scoreType.equals("baseline"))
@@ -39,7 +39,7 @@ public class Rank
 			List<Pair<String,Double>> urlAndScores = new ArrayList<Pair<String,Double>>(queryDict.get(query).size());
 			for (String url : queryDict.get(query).keySet())
 			{
-				double score = scorer.getSimScore(queryDict.get(query).get(url), query);
+				double score = scorer.getSimScore(queryDict.get(query).get(url), query, idfs, numDocs);
 				urlAndScores.add(new Pair<String,Double>(url,score));
 			}
 
@@ -101,13 +101,13 @@ public class Rank
 				}
 				
 				String queryStr = "query: " + queryBuilder.toString() + "\n";
-		        System.out.print(queryStr);
+		        //System.out.print(queryStr);
 				bw.write(queryStr);
 				
 		        for (String res : queryRankings.get(query))
 		        {
 		        	String urlString = "  url: " + res + "\n";
-		        	System.out.print(urlString);
+		        	//System.out.print(urlString);
 		        	bw.write(urlString);
 		        }
 			}	
@@ -122,8 +122,10 @@ public class Rank
 	public static void main(String[] args) throws Exception 
 	{
 		//LoadHandler.buildDFs("/Users/msushkov/Dropbox/Stanford/Classes/CS 276/hw1/data", "termDocCountFile");
-		Map<String,Double> idfs = LoadHandler.loadDFs("termDocCountFile");
-
+		Pair<Map<String,Double>, Integer> result = LoadHandler.loadDFs("termDocCountFile");
+		Map<String,Double> idfs = result.getFirst();
+		int numDocs = result.getSecond();
+		
 		if (args.length < 2) {
 			System.err.println("Insufficient number of arguments: <queryDocTrainData path> taskType");
 		}
@@ -147,11 +149,11 @@ public class Rank
 		}
 		
 		//score documents for queries
-		Map<Query,List<String>> queryRankings = score(queryDict,scoreType,idfs);
+		Map<Query,List<String>> queryRankings = score(queryDict, scoreType, idfs, numDocs);
 		
 		//print results and save them to file 
-//		String outputFilePath =  null;
-//		writeRankedResultsToFile(queryRankings,outputFilePath);
+		String outputFilePath =  "ranked.txt";
+		writeRankedResultsToFile(queryRankings, outputFilePath);
 		
 		//print results
 		//printRankedResults(queryRankings);

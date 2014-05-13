@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import edu.stanford.cs276.util.Pair;
+
 public class LoadHandler 
 {
 	
@@ -101,13 +103,15 @@ public class LoadHandler
 	}
 	
 	//unserializes from file
-	public static Map<String,Double> loadDFs(String idfFile)
+	public static Pair<Map<String,Double>, Integer> loadDFs(String idfFile)
 	{
 		  Map<String,Double> termDocCount = null;
+		  int numDocs = -1;
 	      try
 	      {
 	         FileInputStream fis = new FileInputStream(idfFile);
 	         ObjectInputStream ois = new ObjectInputStream(fis);
+	         numDocs = (Integer) ois.readObject();
 	         termDocCount = (HashMap<String,Double>) ois.readObject();
 	         ois.close();
 	         fis.close();
@@ -117,13 +121,12 @@ public class LoadHandler
 	         ioe.printStackTrace();
 	         return null;
 	      }
-		return termDocCount;
+		return new Pair(termDocCount, numDocs);
 	}
 	
 	//builds and then serializes from file
 	public static Map<String,Double> buildDFs(String dataDir, String idfFile) throws IOException
 	{
-		
 		/* Get root directory */
 		String root = dataDir;
 		File rootdir = new File(root);
@@ -138,7 +141,7 @@ public class LoadHandler
 		
 		//counts number of documents in which each term appears
 		Map<String,Double> termDocCount = new HashMap<String,Double>();
-
+		
 		/* For each block */
 		for (File block : dirlist) {
 			// get the files in the current block
@@ -178,7 +181,8 @@ public class LoadHandler
 		//make idf
 		for (String term : termDocCount.keySet())
 		{
-			termDocCount.put(term, Math.log10(totalDocCount) - Math.log10(termDocCount.get(term)));
+			term = term.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
+			termDocCount.put(term, Math.log10(totalDocCount + (double) termDocCount.size()) - Math.log10(1.0 + termDocCount.get(term)));
 		}
 		
 		
@@ -187,6 +191,7 @@ public class LoadHandler
         {
 			FileOutputStream fos = new FileOutputStream(idfFile);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(totalDocCount);
 			oos.writeObject(termDocCount);
 			oos.close();
 			fos.close();
