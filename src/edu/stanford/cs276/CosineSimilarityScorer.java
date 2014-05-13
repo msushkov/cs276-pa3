@@ -19,11 +19,11 @@ public class CosineSimilarityScorer extends AScorer
 {
 	///////////////weights///////////////////////////
 	
-	private double urlweight = 1;
-	private double titleweight = 1;
-	private double bodyweight = 1;
-	private double headerweight = 1;
-	private double anchorweight = 1;
+	private double urlweight = -1;
+	private double titleweight = -1;
+	private double bodyweight = -1;
+	private double headerweight = -1;
+	private double anchorweight = -1;
 	private double smoothingBodyLength = 500;
 
 	Map<String, Double> weightParams = new HashMap<String, Double>();
@@ -98,9 +98,5 @@ public class CosineSimilarityScorer extends AScorer
 		
 		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs);
 	}
-
-
-
-
 
 }
