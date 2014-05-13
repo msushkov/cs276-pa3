@@ -124,17 +124,8 @@ public class Rank
 
 	public static void main(String[] args) throws IOException 
 	{
-
-		LoadHandler.buildDFs("/Users/msushkov/Dropbox/Stanford/Classes/CS 276/hw1/data", "termDocCountFile");
+		//LoadHandler.buildDFs("/Users/msushkov/Dropbox/Stanford/Classes/CS 276/hw1/data", "termDocCountFile");
 		Map<String,Double> idfs = LoadHandler.loadDFs("termDocCountFile");
-		
-		System.out.println("SUSHKOV");
-		
-		for (String t : idfs.keySet()) {
-			System.out.println(t + " " + idfs.get(t));
-		}
-		
-		System.out.println("SUSHKOV");
 
 		if (args.length < 2) {
 			System.err.println("Insufficient number of arguments: <queryDocTrainData path> taskType");

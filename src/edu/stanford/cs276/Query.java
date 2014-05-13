@@ -8,12 +8,12 @@ public class Query
 {
 
 	List<String> queryWords;
+	public String queryString;
 	
 	public Query(String query)
 	{
 		queryWords = new ArrayList<String>(Arrays.asList(query.split(" ")));
+		queryString = query;
 	}
-	
-	
 	
 }

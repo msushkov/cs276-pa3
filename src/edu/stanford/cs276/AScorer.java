@@ -56,19 +56,14 @@ public abstract class AScorer
 	 */
 	public Map<String,Map<String, Double>> getDocTermFreqs(Document d, Query q)
 	{
+		System.out.println("In getDocTermFreqs(). DOCUMENT: " + d.toString());
+		
 		//map from tf type -> queryWord -> score
 		Map<String,Map<String, Double>> tfs = new HashMap<String,Map<String, Double>>();
 		
-		////////////////////Initialization/////////////////////
-		
-		/*
-		 * @//TODO : Your code here
-		 */
-		
-		
-	    ////////////////////////////////////////////////////////
-		
 		//////////handle counts//////
+		
+		// TODO: DEBUG THE COUNTS!
 		
 		// go through url, title, etc
 		for (String type : TFTYPES) {
@@ -84,28 +79,52 @@ public abstract class AScorer
 			//loop through query terms increasing relevant tfs
 			for (String queryWord : q.queryWords)
 			{
+				queryWord = queryWord.toLowerCase();
+				
 				// is this a term we haven't seen before?
 				if (!currTermMap.containsKey(queryWord)) {
 					// url
-					if (type.equals("url")) {
+					if (type.equals("url") && d.url != null) {
 						currTermMap.put(queryWord, countNumOfOccurrencesInString(queryWord, d.url));
 					}
 					
 					// title
-					if (type.equals("title")) {
+					if (type.equals("title") && d.title != null) {
 						currTermMap.put(queryWord, countNumOfOccurrencesInString(queryWord, d.title));
 					}
 					
 					// headers
-					if (type.equals("header")) {
+					if (type.equals("header") && d.headers != null) {
+						// create a single string out of the headers list
+						StringBuffer concatenatedHeader = new StringBuffer();
 						for (String header : d.headers) {
-							// TODO
+							concatenatedHeader.append(header);
 						}
+						
+						currTermMap.put(queryWord, countNumOfOccurrencesInString(queryWord, concatenatedHeader.toString()));
+					}
+					
+					// body
+					if (type.equals("body") && d.body_hits != null) {
+						currTermMap.put(queryWord, (double) d.body_hits.size());
+					}
+					
+					// anchor
+					if (type.equals("anchor") && d.anchors != null) {
+						int count = 0;
+						for (String anchor : d.anchors.keySet()) {
+							// for each anchor, count how many times the query term occurs in that anchor and multiply by the number of times that anchor occurs
+							count += countNumOfOccurrencesInString(queryWord, anchor) * d.anchors.get(anchor);
+						}
+						
+						currTermMap.put(queryWord, (double) count);
 					}
 				}
 			}
 		}
 		
+		// debug
+		debugPrinttfResult(tfs, q);
 		
 		return tfs;
 	}
@@ -125,4 +144,17 @@ public abstract class AScorer
 	    return count;
 	}
 
+	private void debugPrinttfResult(Map<String,Map<String, Double>> tf, Query q) {
+		System.out.println("QUERY: " + q.queryString);
+		for (String type : tf.keySet()) {
+			System.out.print("TYPE: " + type + " ");
+			
+			for (String term : tf.get(type).keySet()) {
+				System.out.print(term + " " +  tf.get(type).get(term));
+			}
+			
+			System.out.println();
+		}
+	}
+	
 }
