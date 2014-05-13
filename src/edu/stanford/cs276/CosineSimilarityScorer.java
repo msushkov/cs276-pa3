@@ -1,29 +1,17 @@
 package edu.stanford.cs276;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class CosineSimilarityScorer extends AScorer
 {
 	///////////////weights///////////////////////////
 	
-	private double urlweight = -1;
-	private double titleweight = -1;
-	private double bodyweight = -1;
-	private double headerweight = -1;
-	private double anchorweight = -1;
+	private double urlweight = 1;
+	private double titleweight = 1;
+	private double bodyweight = 1;
+	private double headerweight = 1;
+	private double anchorweight = 1;
 	private double smoothingBodyLength = 500;
 
 	Map<String, Double> weightParams = new HashMap<String, Double>();
@@ -61,7 +49,7 @@ public class CosineSimilarityScorer extends AScorer
 					idfComponent = Math.log10(idfs.size() + numDocs);
 				}
 				
-				currTotal += tfs.get(type).get(term) * idfComponent;
+				currTotal += tfs.get(type).get(term) * tfQuery.get(term) * idfComponent;
 			}
 			
 			score += weightParams.get(type) * currTotal;
@@ -80,7 +68,7 @@ public class CosineSimilarityScorer extends AScorer
 				double tf = tfs.get(type).get(term);
 				double newVal = 0;
 				if (tf != 0) {
-					newVal = (1.0 + Math.log(tf)) / (smoothingBodyLength + d.body_length);
+					newVal = (1.0 + Math.log10(tf)) / (smoothingBodyLength + d.body_length);
 				}
 				tfs.get(type).put(term, newVal);
 			}
