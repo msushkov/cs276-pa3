@@ -20,14 +20,16 @@ public abstract class AScorer
 	}
 	
 	//scores each document for each query
-	public abstract double getSimScore(Document d, Query q);
+	public abstract double getSimScore(Document d, Query q) throws Exception;
 	
 	//handle the query vector
 	public Map<String,Double> getQueryFreqs(Query q)
 	{
-		Map<String,Double> tfQuery = new HashMap<String,Double>();
+		Map<String, Double> tfQuery = new HashMap<String, Double>();
 		
 		for (String term : q.queryWords) {
+			term = term.replaceAll("[^A-Za-z0-9 ]", "");
+			
 			if (tfQuery.containsKey(term)) {
 				tfQuery.put(term, tfQuery.get(term) + 1.0);
 			} else {
@@ -56,30 +58,28 @@ public abstract class AScorer
 		// go through url, title, etc
 		for (String type : TFTYPES) {
 			Map<String, Double> currTermMap = new HashMap<String, Double>();
+			tfs.put(type, currTermMap);
 			
 			//loop through query terms increasing relevant tfs
 			for (String queryWord : q.queryWords)
 			{
 				queryWord = queryWord.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
 				
+				// everything by default has a value of 0
+				currTermMap.put(queryWord, 0.0);
+				
 				// is this a term we haven't seen before?
 				if (!currTermMap.containsKey(queryWord)) {
 					// url
 					if (type.equals("url") && d.url != null) {
 						double numInUrl = countNumOfOccurrencesInUrl(queryWord, d.url);
-						if (numInUrl > 0) {
-							currTermMap.put(queryWord, numInUrl);
-							tfs.put(type, currTermMap);
-						}
+						currTermMap.put(queryWord, numInUrl);
 					}
 					
 					// title
 					if (type.equals("title") && d.title != null) {
 						double numInTitle = countNumOfOccurrencesInString(queryWord, d.title);
-						if (numInTitle > 0) {
-							currTermMap.put(queryWord, numInTitle);
-							tfs.put(type, currTermMap);
-						}
+						currTermMap.put(queryWord, numInTitle);
 					}
 					
 					// headers
@@ -92,17 +92,13 @@ public abstract class AScorer
 						}
 						
 						double numInHeader = countNumOfOccurrencesInString(queryWord, concatenatedHeader.toString());
-						if (numInHeader > 0) {
-							currTermMap.put(queryWord, numInHeader);
-							tfs.put(type, currTermMap);
-						}
+						currTermMap.put(queryWord, numInHeader);
 					}
 					
 					// body
 					if (type.equals("body") && d.body_hits != null) {
 						if (d.body_hits.containsKey(queryWord)) {
 							currTermMap.put(queryWord, (double) d.body_hits.get(queryWord).size());
-							tfs.put(type, currTermMap);
 						}
 					}
 					
@@ -114,14 +110,13 @@ public abstract class AScorer
 							count += countNumOfOccurrencesInString(queryWord, anchor) * d.anchors.get(anchor);
 						}
 						
-						if (count > 0) {
-							currTermMap.put(queryWord, (double) count);
-							tfs.put(type, currTermMap);
-						}
+						currTermMap.put(queryWord, (double) count);
 					}
 				}
 			}
 		}
+		
+		//debugPrinttfResult(tfs);
 		
 		return tfs;
 	}

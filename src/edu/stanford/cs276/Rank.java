@@ -14,7 +14,7 @@ public class Rank
 {
 
 	private static Map<Query,List<String>> score(Map<Query,Map<String, Document>> queryDict, String scoreType,
-			Map<String,Double> idfs)
+			Map<String,Double> idfs) throws Exception
 	{
 		AScorer scorer = null;
 		if (scoreType.equals("baseline"))
@@ -119,7 +119,7 @@ public class Rank
 		}
 	}
 
-	public static void main(String[] args) throws IOException 
+	public static void main(String[] args) throws Exception 
 	{
 		//LoadHandler.buildDFs("/Users/msushkov/Dropbox/Stanford/Classes/CS 276/hw1/data", "termDocCountFile");
 		Map<String,Double> idfs = LoadHandler.loadDFs("termDocCountFile");
@@ -154,6 +154,6 @@ public class Rank
 //		writeRankedResultsToFile(queryRankings,outputFilePath);
 		
 		//print results
-		printRankedResults(queryRankings);
+		//printRankedResults(queryRankings);
 	}
 }

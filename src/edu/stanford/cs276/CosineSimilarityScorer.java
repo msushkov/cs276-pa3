@@ -17,54 +17,75 @@ import java.util.Set;
 
 public class CosineSimilarityScorer extends AScorer
 {
+	///////////////weights///////////////////////////
+	
+	private static double urlweight = -1;
+	private static double titleweight  = -1;
+	private static double bodyweight = -1;
+	private static double headerweight = -1;
+	private static double anchorweight = -1;
+	private static double smoothingBodyLength = 500;
+
+	Map<String, Double> weightParams = new HashMap<String, Double>();
+
+	//////////////////////////////////////////
+
+
 	public CosineSimilarityScorer(Map<String,Double> idfs)
 	{
 		super(idfs);
+		
+		weightParams.put("url", urlweight);
+		weightParams.put("title", titleweight);
+		weightParams.put("body", bodyweight);
+		weightParams.put("header", headerweight);
+		weightParams.put("anchor", anchorweight);
 	}
-	
-	///////////////weights///////////////////////////
-    double urlweight = -1;
-    double titleweight  = -1;
-    double bodyweight = -1;
-    double headerweight = -1;
-    double anchorweight = -1;
-    
-    double smoothingBodyLength = -1;
-    //////////////////////////////////////////
-	
-	public double getNetScore(Map<String,Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery,Document d)
+
+	public double getNetScore(Map<String, Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery, Document d) throws Exception
 	{
 		double score = 0.0;
-		
-		/*
-		 * @//TODO : Your code here
-		 */
-		
+
+		for (String type : tfs.keySet()) {
+			double currTotal = 0;
+			for (String term : tfs.get(type).keySet()) {
+				if (!tfQuery.containsKey(term)) {
+					throw new Exception("Exception in getNetScore(): KEYS ARE NOT THE SAME!");
+				}
+				currTotal += tfs.get(type).get(term) * tfQuery.get(term);
+			}
+			
+			score += weightParams.get(type) * currTotal;
+		}
+
 		return score;
 	}
 
-	
-	public void normalizeTFs(Map<String,Map<String, Double>> tfs, Document d, Query q)
+
+	public void normalizeTFs(Map<String, Map<String, Double>> tfs, Document d, Query q)
 	{
-		/*
-		 * @//TODO : Your code here
-		 */
+		for (String type : tfs.keySet()) {			
+			for (String term : tfs.get(type).keySet()) {
+				double newVal = (1.0 + Math.log(tfs.get(type).get(term))) / (smoothingBodyLength + d.body_length);
+				tfs.get(type).put(term, newVal);
+			}
+		}
 	}
 
-	
+
 	@Override
-	public double getSimScore(Document d, Query q) 
+	public double getSimScore(Document d, Query q) throws Exception 
 	{
 		Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d, q);
 		this.normalizeTFs(tfs, d, q);
-		
+
 		Map<String,Double> tfQuery = getQueryFreqs(q);
 
-        return getNetScore(tfs, q, tfQuery, d);
+		return getNetScore(tfs, q, tfQuery, d);
 	}
 
-	
-	
-	
-	
+
+
+
+
 }
