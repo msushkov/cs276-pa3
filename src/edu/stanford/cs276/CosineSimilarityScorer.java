@@ -44,7 +44,7 @@ public class CosineSimilarityScorer extends AScorer
 	}
 
 	
-	public void normalizeTFs(Map<String,Map<String, Double>> tfs,Document d, Query q)
+	public void normalizeTFs(Map<String,Map<String, Double>> tfs, Document d, Query q)
 	{
 		/*
 		 * @//TODO : Your code here
@@ -55,15 +55,12 @@ public class CosineSimilarityScorer extends AScorer
 	@Override
 	public double getSimScore(Document d, Query q) 
 	{
-		
-		Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d,q);
-		
+		Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d, q);
 		this.normalizeTFs(tfs, d, q);
 		
 		Map<String,Double> tfQuery = getQueryFreqs(q);
-		
-		
-        return getNetScore(tfs,q,tfQuery,d);
+
+        return getNetScore(tfs, q, tfQuery, d);
 	}
 
 	
