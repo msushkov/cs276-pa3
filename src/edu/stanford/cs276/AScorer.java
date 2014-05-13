@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class AScorer 
 {
@@ -25,9 +27,13 @@ public abstract class AScorer
 	{
 		Map<String,Double> tfQuery = new HashMap<String,Double>();
 		
-		/*
-		 * @//TODO : Your code here
-		 */
+		for (String term : q.queryWords) {
+			if (tfQuery.containsKey(term)) {
+				tfQuery.put(term, tfQuery.get(term) + 1.0);
+			} else {
+				tfQuery.put(term, 1.0);
+			}
+		}
 		
 		return tfQuery;
 	}
@@ -59,20 +65,64 @@ public abstract class AScorer
 		 * @//TODO : Your code here
 		 */
 		
+		
 	    ////////////////////////////////////////////////////////
 		
 		//////////handle counts//////
 		
-		//loop through query terms increasing relevant tfs
-		for (String queryWord : q.queryWords)
-		{
-			/*
-			 * @//TODO : Your code here
-			 */
+		// go through url, title, etc
+		for (String type : TFTYPES) {
+			Map<String, Double> currTermMap;
 			
+			if (!tfs.containsKey(type)) {
+				currTermMap = new HashMap<String, Double>();
+				tfs.put(type, currTermMap);
+			} else {
+				currTermMap = tfs.get(type);
+			}
+			
+			//loop through query terms increasing relevant tfs
+			for (String queryWord : q.queryWords)
+			{
+				// is this a term we haven't seen before?
+				if (!currTermMap.containsKey(queryWord)) {
+					// url
+					if (type.equals("url")) {
+						currTermMap.put(queryWord, countNumOfOccurrencesInString(queryWord, d.url));
+					}
+					
+					// title
+					if (type.equals("title")) {
+						currTermMap.put(queryWord, countNumOfOccurrencesInString(queryWord, d.title));
+					}
+					
+					// headers
+					if (type.equals("header")) {
+						for (String header : d.headers) {
+							// TODO
+						}
+					}
+				}
+			}
 		}
+		
+		
 		return tfs;
 	}
 	
+	/*
+	 * Counts the number of occurrences of term in str.
+	 * 
+	 * http://stackoverflow.com/questions/767759/occurrences-of-substring-in-a-string
+	 */
+	private double countNumOfOccurrencesInString(String term, String str) {
+	    Pattern p = Pattern.compile(term.toLowerCase());
+	    Matcher m = p.matcher(str.toLowerCase());
+	    double count = 0;
+	    while (m.find()){
+	    	count +=1;
+	    }
+	    return count;
+	}
 
 }
