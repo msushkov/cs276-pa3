@@ -35,14 +35,14 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 	
 	
 	@Override
-	public double getSimScore(Document d, Query q, Map<String,Double> idfs, int numDocs) throws Exception {
+	public double getSimScore(Document d, Query q, Map<String, Double> idfs, int numDocs) throws Exception {
 		Map<String,Map<String, Double>> tfs = this.getDocTermFreqs(d,q);
 		
 		this.normalizeTFs(tfs, d, q);
 		
 		Map<String,Double> tfQuery = getQueryFreqs(q);
 		
-		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs) * B;
+		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs, B);
 	}
 
 }

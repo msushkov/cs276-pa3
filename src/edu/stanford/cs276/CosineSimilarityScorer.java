@@ -31,7 +31,7 @@ public class CosineSimilarityScorer extends AScorer
 	}
 
 	public double getNetScore(Map<String, Map<String, Double>> tfs, Query q, 
-			Map<String, Double> tfQuery, Document d, Map<String, Double> idfs, int numDocs) throws Exception
+			Map<String, Double> tfQuery, Document d, Map<String, Double> idfs, int numDocs, double smallestWindowConstant) throws Exception
 	{
 		double score = 0.0;
 
@@ -52,7 +52,7 @@ public class CosineSimilarityScorer extends AScorer
 				currTotal += tfs.get(type).get(term) * tfQuery.get(term) * idfComponent;
 			}
 			
-			score += weightParams.get(type) * currTotal;
+			score += weightParams.get(type) * currTotal * smallestWindowConstant;
 		}
 		
 		//System.out.println("SCORE: " + score);
@@ -84,7 +84,7 @@ public class CosineSimilarityScorer extends AScorer
 
 		Map<String,Double> tfQuery = getQueryFreqs(q);
 		
-		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs);
+		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs, 1.0);
 	}
 
 }
