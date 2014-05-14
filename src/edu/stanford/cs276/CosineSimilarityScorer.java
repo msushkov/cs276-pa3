@@ -7,12 +7,12 @@ public class CosineSimilarityScorer extends AScorer
 {
 	///////////////weights///////////////////////////
 	
-	private double urlweight = 1;
-	private double titleweight = 1;
-	private double bodyweight = 1;
-	private double headerweight = 1;
-	private double anchorweight = 1;
-	private double smoothingBodyLength = 500;
+	private double urlweight = 1.5;
+	private double titleweight = 1.3;
+	private double bodyweight = 0.3;
+	private double headerweight = 1.5;
+	private double anchorweight = 1.5;
+	private double smoothingBodyLength = 30000;
 
 	Map<String, Double> weightParams = new HashMap<String, Double>();
 

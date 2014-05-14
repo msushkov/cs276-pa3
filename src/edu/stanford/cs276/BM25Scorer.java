@@ -10,16 +10,16 @@ public class BM25Scorer extends AScorer
 	Map<Query,Map<String, Document>> queryDict;
 
 	///////////////weights///////////////////////////
-	double urlweight = 1;
-	double titleweight = 1;
-	double bodyweight = 1;
-	double headerweight = 1;
-	double anchorweight = 1;
+	double urlweight = 6.0;
+	double titleweight = 4.5;
+	double bodyweight = 0.1;
+	double headerweight = 0.7;
+	double anchorweight = 10;
 
 	///////bm25 specific weights///////////////
 	double burl = 0.75;
 	double btitle = 0.75;
-	double bheader = 0.75;
+	double bheader = 1;
 	double bbody = 0.75;
 	double banchor = 0.75;
 
@@ -169,9 +169,24 @@ public class BM25Scorer extends AScorer
 				} else {
 					double newVal = tfs.get(type).get(term);
 					
-					newVal /= 1.0 + weightParams.get("b" + type) * 
-							(lengths.get(d).get(type) / avgLengths.get(type) - 1);
-					tfs.get(type).put(term, newVal);
+					//System.out.println("Old newvaL: " + newVal);
+					//System.out.println("LengthGetDGetType = " + lengths.get(d).get(type));
+					
+					double x = (lengths.get(d).get(type) / avgLengths.get(type)) - 1.0;
+					double Bf = weightParams.get("b" + type);
+					
+					//System.out.println("x = " + x);
+					//System.out.println("Bf = " + Bf);
+					
+					double veryNewVal = newVal / (1.0 + Bf * x);
+					
+					//newVal = newVal / (1.0 + weightParams.get("b" + type) * 
+					//		(lengths.get(d).get(type) / avgLengths.get(type) - 1));
+					
+					
+					
+					tfs.get(type).put(term, veryNewVal);
+				
 				}
 			}
 		}
