@@ -68,7 +68,7 @@ public class LoadHandler
 				if (queryDict.get(query).get(url).body_hits == null)
 					queryDict.get(query).get(url).body_hits = new HashMap<String, List<Integer>>();
 				String[] temp = value.split(" ", 2);
-				String term = temp[0].trim();
+				String term = temp[0].trim().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
 				List<Integer> positions_int;
 				
 				if (!queryDict.get(query).get(url).body_hits.containsKey(term))
