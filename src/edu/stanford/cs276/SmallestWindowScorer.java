@@ -13,6 +13,7 @@ import edu.stanford.cs276.util.Pair;
 public class SmallestWindowScorer extends CosineSimilarityScorer
 {
 	/////smallest window specific hyperparameters////////
+	
 	double B = 2;    	    
 
 	//////////////////////////////
@@ -43,22 +44,23 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 				
 				if (smallestWindow == Integer.MAX_VALUE) {
 					val = 1.0;
+				} else {
+					// find # of unique terms in the query
+					Set<String> uniqueQueryTerms = new HashSet<String>();
+					String[] tokens = q.queryString.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "").split(" ");
+					for (String term : tokens) {
+						uniqueQueryTerms.add(term);
+					}
+					
+					// if the query has 1 unique term, then it should be boosted to the max
+					if (uniqueQueryTerms.size() == 1 || smallestWindow == uniqueQueryTerms.size()) {
+						val = B;
+					} else {
+						// if the window is larger than the query size
+						val = 1.0 + (B - 1) * Math.exp(-(smallestWindow - uniqueQueryTerms.size()));
+					}
 				}
-				
-				// find # of unique terms in the query
-				Set<String> uniqueQueryTerms = new HashSet<String>();
-				String[] tokens = q.queryString.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "").split(" ");
-				for (String term : tokens) {
-					uniqueQueryTerms.add(term);
-				}
-				
-				if (smallestWindow == uniqueQueryTerms.size()) {
-					val = B;
-				}
-				
-				// if the window is larger than the query size
-				val = 1.0 + (B - 1) * Math.exp(-(smallestWindow - uniqueQueryTerms.size()));
-				
+
 				smallestWindows.get(q).put(currDoc, val);
 			}
 		}
@@ -90,7 +92,7 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 				
 				// make sure very term in the query is contained in the body
 				if (everyTermOccurs(tokens, contents)) {
-					System.out.println("every term occurs in the body");
+					//System.out.println("every term occurs in the body");
 					
 					int currWindow = getWindow(currDoc.body_hits);
 
@@ -132,6 +134,8 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 		String[] contents = contentStr.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "").split(" ");
 		
 		if (everyTermOccurs(tokens, contents)) {
+			//System.out.println("every term appears");
+			
 			for (String term : tokens) {
 				// indices for current term
 				List<Integer> indices = new ArrayList<Integer>();
@@ -198,14 +202,16 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 			if (currVal < min) {
 				min = currVal;
 				minToken = key;
-			} else if (currVal > max) {
+			}
+			
+			if (currVal > max) {
 				max = currVal;
 			}
 		}
 		
 		//System.out.println("window size: " + (max - min));
 		
-		return new Pair(max - min, minToken);
+		return new Pair((max - min), minToken);
 	}
 	
 	// Returns false if we have reached the end of the list at key.
@@ -247,9 +253,9 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 
 		Map<String,Double> tfQuery = getQueryFreqs(q);
 
-		System.out.println("QUERY: " + q.queryString);
-		System.out.println("DOCUMENT:\n" + d.toString());
-		System.out.println("smallest window: " + findSmallestWindow(q, d) + "\nDONE\n");
+		//System.out.println("QUERY: " + q.queryString);
+		//System.out.println("DOCUMENT:\n" + d.toString());
+		//System.out.println("smallest window: " + findSmallestWindow(q, d) + "\nDONE\n");
 		
 		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs, smallestWindows.get(q).get(d));
 	}
