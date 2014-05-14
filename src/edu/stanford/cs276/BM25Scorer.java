@@ -17,13 +17,13 @@ public class BM25Scorer extends AScorer
 	double anchorweight = 1;
 
 	///////bm25 specific weights///////////////
-	double burl = 1;
-	double btitle = 1;
-	double bheader = 1;
-	double bbody = 1;
-	double banchor = 1;
+	double burl = 0.75;
+	double btitle = 0.75;
+	double bheader = 0.75;
+	double bbody = 0.75;
+	double banchor = 0.75;
 
-	double k1 = 1;
+	double k1 = 1.2;
 	double pageRankLambda = 1;
 	double pageRankLambdaPrime = 1;
 	//////////////////////////////////////////
@@ -143,9 +143,16 @@ public class BM25Scorer extends AScorer
 			score += w * idfComponent / (k1 + w);
 		}
 
-		score += pageRankLambda * Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
+		score += getPageRankScore(d);
 		
 		return score;
+	}
+	
+	private double getPageRankScore(Document d) {
+		// tune this function
+		double funcVal = Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
+		
+		return pageRankLambda * funcVal;
 	}
 
 	//do bm25 normalization
