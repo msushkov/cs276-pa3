@@ -143,10 +143,18 @@ public class BM25Scorer extends AScorer
 			
 			score += w * idfComponent / (k1 + w);
 		}
+		
 		//score += pageRankLambda * (pagerankScores.get(d) / (pageRankLambdaPrime + pagerankScores.get(d)));
 		//score += pageRankLambda * Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
 		score += pageRankLambda * 1/ (pageRankLambdaPrime + Math.exp(-1.0 * pageRankLambdaDubPrime * pagerankScores.get(d)));
 		return score;
+	}
+	
+	private double getPageRankScore(Document d) {
+		// tune this function
+		double funcVal = Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
+		
+		return pageRankLambda * funcVal;
 	}
 
 	//do bm25 normalization
