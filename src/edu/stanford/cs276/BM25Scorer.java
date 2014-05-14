@@ -15,16 +15,16 @@ public class BM25Scorer extends AScorer
 	double anchorweight = 10;
 
 	///////bm25 specific weights///////////////
-	double burl = 0.75;
-	double btitle = 0.75;
-	double bheader = 0.75;
+	double burl = 2;
+	double btitle = 1;
+	double bheader = 0.5;
 	double bbody = 0.75;
-	double banchor = 0.75;
+	double banchor = 0.1;
 
-	double k1 = 1.2;
+	double k1 = 1;
 	double pageRankLambda = 1.2;
-	double pageRankLambdaPrime = 0.6;
-	double pageRankLambdaDubPrime = 1.2;
+	double pageRankLambdaPrime = 0.5;
+	double pageRankLambdaDubPrime = 4;
 	//////////////////////////////////////////
 
 	Map<String, Double> weightParams = new HashMap<String, Double>();
@@ -84,7 +84,7 @@ public class BM25Scorer extends AScorer
 					int currLength = 0;
 
 					if (tfType.equals("url") && curr.url != null) {
-						currLength = getNumTokens(curr.url);
+						currLength = getNumUrlTokens(curr.url);
 						
 					} else if (tfType.equals("title") && curr.title != null) {
 						currLength = getNumTokens(curr.title);
@@ -149,9 +149,9 @@ public class BM25Scorer extends AScorer
 	
 	private double getPageRankScore(Document d) {
 		// tune the pagerank function
-		// pageRankLambda * (pagerankScores.get(d) / (pageRankLambdaPrime + pagerankScores.get(d)));
-		// Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
-		double funcVal = pageRankLambda * 1/ (pageRankLambdaPrime + 
+		// double funcVal = pagerankScores.get(d) / (pageRankLambdaPrime + pagerankScores.get(d));
+		//double funcVal = Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
+		double funcVal = 1 / (pageRankLambdaPrime + 
 				Math.exp(-1.0 * pageRankLambdaDubPrime * pagerankScores.get(d)));
 		
 		return pageRankLambda * funcVal;
@@ -187,14 +187,16 @@ public class BM25Scorer extends AScorer
 
 		Map<String,Double> tfQuery = getQueryFreqs(q);
 		
-		
-
 		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs);
 	}
 
 	private int getNumTokens(String str) {
 		str = str.replaceAll("[^A-Za-z0-9 ]", "");
 		return str.split(" ").length;
+	}
+	
+	private int getNumUrlTokens(String str) {
+		return str.split("[^A-Za-z0-9 ]").length;
 	}
 
 }
