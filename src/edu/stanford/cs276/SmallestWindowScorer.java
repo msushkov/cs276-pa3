@@ -12,7 +12,8 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
     
     //////////////////////////////
 	
-	public SmallestWindowScorer(Map<String, Double> idfs, Map<Query, Map<String, Document>> queryDict) 
+	public SmallestWindowScorer(Map<String, Double> idfs, Map<Query,
+			Map<String, Document>> queryDict) 
 	{
 		super(idfs);
 		handleSmallestWindow();

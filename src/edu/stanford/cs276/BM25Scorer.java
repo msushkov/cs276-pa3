@@ -10,22 +10,22 @@ public class BM25Scorer extends AScorer
 	Map<Query,Map<String, Document>> queryDict;
 
 	///////////////weights///////////////////////////
-	double urlweight = -1;
-	double titleweight  = -1;
-	double bodyweight = -1;
-	double headerweight = -1;
-	double anchorweight = -1;
+	double urlweight = 1;
+	double titleweight = 1;
+	double bodyweight = 1;
+	double headerweight = 1;
+	double anchorweight = 1;
 
 	///////bm25 specific weights///////////////
-	double burl=-1;
-	double btitle=-1;
-	double bheader=-1;
-	double bbody=-1;
-	double banchor=-1;
+	double burl = 1;
+	double btitle = 1;
+	double bheader = 1;
+	double bbody = 1;
+	double banchor = 1;
 
-	double k1=-1;
-	double pageRankLambda=-1;
-	double pageRankLambdaPrime=-1;
+	double k1 = 1;
+	double pageRankLambda = 1;
+	double pageRankLambdaPrime = 1;
 	//////////////////////////////////////////
 
 	Map<String, Double> weightParams = new HashMap<String, Double>();
@@ -84,18 +84,18 @@ public class BM25Scorer extends AScorer
 
 					int currLength = 0;
 
-					if (tfType.equals("url")) {
+					if (tfType.equals("url") && curr.url != null) {
 						currLength = curr.url.length();
-					} else if (tfType.equals("title")) {
+					} else if (tfType.equals("title") && curr.title != null) {
 						currLength = getNumTokens(curr.title);
-					} else if (tfType.equals("header")) {
+					} else if (tfType.equals("header") && curr.headers != null) {
 						currLength = 0;
 						for (String h : curr.headers) {
 							currLength += getNumTokens(h);
 						}
 					} else if (tfType.equals("body")) {
 						currLength = curr.body_length;
-					} else if (tfType.equals("anchor")) {
+					} else if (tfType.equals("anchor") && curr.anchors != null) {
 						currLength = 0;
 						for (String anchor : curr.anchors.keySet()) {
 							currLength += getNumTokens(anchor) * curr.anchors.get(anchor);
@@ -122,7 +122,7 @@ public class BM25Scorer extends AScorer
 
 
 	public double getNetScore(Map<String,Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery,
-			Document d, Map<String,Double> idfs) {
+			Document d, Map<String,Double> idfs, int numDocs) {
 		double score = 0.0;
 
 		// for each term in the query
@@ -133,7 +133,14 @@ public class BM25Scorer extends AScorer
 				w += weightParams.get(type) * tfs.get(type).get(term);
 			}
 			
-			score += w * idfs.get(term) / (k1 + w);
+			double idfComponent = -1;
+			if (idfs.containsKey(term)) {
+				idfComponent = idfs.get(term);
+			} else {
+				idfComponent = Math.log10(idfs.size() + numDocs);
+			}
+			
+			score += w * idfComponent / (k1 + w);
 		}
 
 		score += pageRankLambda * Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
@@ -168,7 +175,7 @@ public class BM25Scorer extends AScorer
 
 		Map<String,Double> tfQuery = getQueryFreqs(q);
 
-		return getNetScore(tfs, q, tfQuery, d, idfs);
+		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs);
 	}
 
 	private int getNumTokens(String str) {
