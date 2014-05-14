@@ -10,22 +10,23 @@ public class BM25Scorer extends AScorer
 	Map<Query,Map<String, Document>> queryDict;
 
 	///////////////weights///////////////////////////
-	double urlweight = 1;
-	double titleweight = 1;
+	double urlweight = 10;
+	double titleweight = 10;
 	double bodyweight = 1;
 	double headerweight = 1;
-	double anchorweight = 1;
+	double anchorweight = 10;
 
 	///////bm25 specific weights///////////////
-	double burl = 1;
-	double btitle = 1;
-	double bheader = 1;
-	double bbody = 1;
-	double banchor = 1;
+	double burl = 0.75;
+	double btitle = 0.75;
+	double bheader = 0.75;
+	double bbody = 0.75;
+	double banchor = 0.75;
 
-	double k1 = 1;
-	double pageRankLambda = 1;
-	double pageRankLambdaPrime = 1;
+	double k1 = 1.2;
+	double pageRankLambda = 1.2;
+	double pageRankLambdaPrime = 1.2;
+	double pageRankLambdaDubPrime = 1.2;
 	//////////////////////////////////////////
 
 	Map<String, Double> weightParams = new HashMap<String, Double>();
@@ -142,9 +143,9 @@ public class BM25Scorer extends AScorer
 			
 			score += w * idfComponent / (k1 + w);
 		}
-
-		score += pageRankLambda * Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
-		
+		//score += pageRankLambda * (pagerankScores.get(d) / (pageRankLambdaPrime + pagerankScores.get(d)));
+		//score += pageRankLambda * Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
+		score += pageRankLambda * 1/ (pageRankLambdaPrime + Math.exp(-1.0 * pageRankLambdaDubPrime * pagerankScores.get(d)));
 		return score;
 	}
 
