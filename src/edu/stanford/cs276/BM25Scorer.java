@@ -10,11 +10,11 @@ public class BM25Scorer extends AScorer
 	Map<Query,Map<String, Document>> queryDict;
 
 	///////////////weights///////////////////////////
-	double urlweight = 10;
-	double titleweight = 10;
+	double urlweight = 1;
+	double titleweight = 1;
 	double bodyweight = 1;
 	double headerweight = 1;
-	double anchorweight = 10;
+	double anchorweight = 1;
 
 	///////bm25 specific weights///////////////
 	double burl = 0.75;
@@ -86,16 +86,20 @@ public class BM25Scorer extends AScorer
 					int currLength = 0;
 
 					if (tfType.equals("url") && curr.url != null) {
-						currLength = curr.url.length();
+						currLength = getNumTokens(curr.url);
+						
 					} else if (tfType.equals("title") && curr.title != null) {
 						currLength = getNumTokens(curr.title);
+						
 					} else if (tfType.equals("header") && curr.headers != null) {
 						currLength = 0;
 						for (String h : curr.headers) {
 							currLength += getNumTokens(h);
 						}
+						
 					} else if (tfType.equals("body")) {
 						currLength = curr.body_length;
+						
 					} else if (tfType.equals("anchor") && curr.anchors != null) {
 						currLength = 0;
 						for (String anchor : curr.anchors.keySet()) {
@@ -112,14 +116,12 @@ public class BM25Scorer extends AScorer
 			}
 		}
 
-		// have the sums for each type; now compute the avg using # docs 
+		// have the sums for each type; now compute the avg using # docs
 		for (String type : this.TFTYPES) {
 			avgLengths.put(type, avgLengths.get(type) / lengths.size());
 		}
 
 	}
-
-	////////////////////////////////////
 
 
 	public double getNetScore(Map<String,Map<String, Double>> tfs, Query q, Map<String,Double> tfQuery,
@@ -148,7 +150,7 @@ public class BM25Scorer extends AScorer
 	}
 	
 	private double getPageRankScore(Document d) {
-		// tune this function
+		// tune the pagerank function
 		// pageRankLambda * (pagerankScores.get(d) / (pageRankLambdaPrime + pagerankScores.get(d)));
 		//double funcVal = Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
 		double funcVal = pageRankLambda * 1/ (pageRankLambdaPrime + 
@@ -169,7 +171,6 @@ public class BM25Scorer extends AScorer
 					
 					newVal /= 1.0 + weightParams.get("b" + type) * 
 							(lengths.get(d).get(type) / avgLengths.get(type) - 1);
-
 					tfs.get(type).put(term, newVal);
 				}
 			}
@@ -183,6 +184,8 @@ public class BM25Scorer extends AScorer
 		this.normalizeTFs(tfs, d, q);
 
 		Map<String,Double> tfQuery = getQueryFreqs(q);
+		
+		
 
 		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs);
 	}
