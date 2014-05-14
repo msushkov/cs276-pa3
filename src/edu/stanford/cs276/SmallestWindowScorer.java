@@ -19,7 +19,7 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 	//////////////////////////////
 
 	// query -> document -> smallest window
-	private Map<Query, Map<Document, Double>> smallestWindows = new HashMap<Query, Map<Document, Double>>();
+	private Map<Query, Map<Document, Double>> smallestWindowBoost = new HashMap<Query, Map<Document, Double>>();
 
 	
 	public SmallestWindowScorer(Map<String, Double> idfs, Map<Query, Map<String, Document>> queryDict) {
@@ -31,7 +31,7 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 	public void initSmallestWindows(Map<Query, Map<String, Document>> queryDict) {
 		// for each query, compute the smallest window for each of the zones of each document
 		for (Query q : queryDict.keySet()) {
-			smallestWindows.put(q, new HashMap<Document, Double>());
+			smallestWindowBoost.put(q, new HashMap<Document, Double>());
 
 			// for each document
 			for (String url : queryDict.get(q).keySet()) {
@@ -61,7 +61,7 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 					}
 				}
 
-				smallestWindows.get(q).put(currDoc, val);
+				smallestWindowBoost.get(q).put(currDoc, val);
 			}
 		}
 	}
@@ -257,7 +257,7 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 		//System.out.println("DOCUMENT:\n" + d.toString());
 		//System.out.println("smallest window: " + findSmallestWindow(q, d) + "\nDONE\n");
 		
-		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs, smallestWindows.get(q).get(d));
+		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs, smallestWindowBoost.get(q).get(d));
 	}
 
 }
