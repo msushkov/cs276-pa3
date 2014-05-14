@@ -42,9 +42,6 @@ public abstract class AScorer
 	 */
 	public Map<String,Map<String, Double>> getDocTermFreqs(Document d, Query q)
 	{
-		//System.out.println("In getDocTermFreqs(). DOCUMENT:\n" + d.toString());
-		//System.out.println("query: " + q.queryString);
-
 		//map from tf type -> queryWord -> score
 		Map<String,Map<String, Double>> tfs = new HashMap<String,Map<String, Double>>();
 
@@ -108,8 +105,6 @@ public abstract class AScorer
 			} // end loop over terms
 		
 		} // end loop over types
-
-		//debugPrinttfResult(tfs);
 
 		return tfs;
 	}

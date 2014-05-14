@@ -54,8 +54,6 @@ public class CosineSimilarityScorer extends AScorer
 			
 			score += weightParams.get(type) * currTotal * smallestWindowConstant;
 		}
-		
-		//System.out.println("SCORE: " + score);
 
 		return score;
 	}

@@ -1,8 +1,6 @@
 package edu.stanford.cs276;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BM25Scorer extends AScorer
@@ -19,13 +17,13 @@ public class BM25Scorer extends AScorer
 	///////bm25 specific weights///////////////
 	double burl = 0.75;
 	double btitle = 0.75;
-	double bheader = 1;
+	double bheader = 0.75;
 	double bbody = 0.75;
 	double banchor = 0.75;
 
 	double k1 = 1.2;
 	double pageRankLambda = 1.2;
-	double pageRankLambdaPrime = 1.2;
+	double pageRankLambdaPrime = 0.6;
 	double pageRankLambdaDubPrime = 1.2;
 	//////////////////////////////////////////
 
@@ -152,7 +150,7 @@ public class BM25Scorer extends AScorer
 	private double getPageRankScore(Document d) {
 		// tune the pagerank function
 		// pageRankLambda * (pagerankScores.get(d) / (pageRankLambdaPrime + pagerankScores.get(d)));
-		//double funcVal = Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
+		// Math.log10(pageRankLambdaPrime + pagerankScores.get(d));
 		double funcVal = pageRankLambda * 1/ (pageRankLambdaPrime + 
 				Math.exp(-1.0 * pageRankLambdaDubPrime * pagerankScores.get(d)));
 		
@@ -168,23 +166,12 @@ public class BM25Scorer extends AScorer
 					tfs.get(type).put(term, 0.0);
 				} else {
 					double newVal = tfs.get(type).get(term);
-					
-					//System.out.println("Old newvaL: " + newVal);
-					//System.out.println("LengthGetDGetType = " + lengths.get(d).get(type));
-					
+
 					double x = (lengths.get(d).get(type) / avgLengths.get(type)) - 1.0;
 					double Bf = weightParams.get("b" + type);
-					
-					//System.out.println("x = " + x);
-					//System.out.println("Bf = " + Bf);
-					
+
 					double veryNewVal = newVal / (1.0 + Bf * x);
-					
-					//newVal = newVal / (1.0 + weightParams.get("b" + type) * 
-					//		(lengths.get(d).get(type) / avgLengths.get(type) - 1));
-					
-					
-					
+
 					tfs.get(type).put(term, veryNewVal);
 				
 				}

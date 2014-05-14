@@ -156,6 +156,6 @@ public class Rank
 		writeRankedResultsToFile(queryRankings, outputFilePath);
 		
 		//print results
-		//printRankedResults(queryRankings);
+		printRankedResults(queryRankings);
 	}
 }

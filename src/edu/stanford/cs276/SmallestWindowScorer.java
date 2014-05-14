@@ -134,8 +134,6 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 		String[] contents = contentStr.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "").split(" ");
 		
 		if (everyTermOccurs(tokens, contents)) {
-			//System.out.println("every term appears");
-			
 			for (String term : tokens) {
 				// indices for current term
 				List<Integer> indices = new ArrayList<Integer>();
@@ -209,8 +207,6 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 			}
 		}
 		
-		//System.out.println("window size: " + (max - min));
-		
 		return new Pair((max - min), minToken);
 	}
 	
@@ -253,10 +249,6 @@ public class SmallestWindowScorer extends CosineSimilarityScorer
 
 		Map<String,Double> tfQuery = getQueryFreqs(q);
 
-		//System.out.println("QUERY: " + q.queryString);
-		//System.out.println("DOCUMENT:\n" + d.toString());
-		//System.out.println("smallest window: " + findSmallestWindow(q, d) + "\nDONE\n");
-		
 		return getNetScore(tfs, q, tfQuery, d, idfs, numDocs, smallestWindowBoost.get(q).get(d));
 	}
 
