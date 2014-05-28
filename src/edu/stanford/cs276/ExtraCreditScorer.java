@@ -11,7 +11,7 @@ public class ExtraCreditScorer extends AScorer
 	}
 	
 	@Override
-	public double getSimScore(Document d, Query q) {
+	public double getSimScore(Document d, Query q, Map<String,Double> idfs, int numDocs) throws Exception {
 		
 		return 0;
 	}

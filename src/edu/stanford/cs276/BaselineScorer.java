@@ -1,5 +1,7 @@
 package edu.stanford.cs276;
 
+import java.util.Map;
+
 public class BaselineScorer extends AScorer
 {
 	
@@ -11,8 +13,7 @@ public class BaselineScorer extends AScorer
 	
 	//We sum over the length of the body_hits array for all query terms
 	@Override
-	public double getSimScore(Document d, Query q) 
-	{
+	public double getSimScore(Document d, Query q, Map<String,Double> idfs, int numDocs) throws Exception {
 		double score = 0.0;
 		if (d.body_hits!=null)
 		{
